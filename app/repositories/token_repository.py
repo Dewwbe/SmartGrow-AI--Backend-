@@ -10,7 +10,7 @@ class TokenDenylistRepository:
     collection_name = "revoked_tokens"
 
     def __init__(self, db=None):
-        self._collection = (db or get_database())[self.collection_name]
+        self._collection = (db if db is not None else get_database())[self.collection_name]
 
     async def revoke(self, jti: str) -> None:
         await self._collection.update_one({"jti": jti}, {"$set": {"jti": jti}}, upsert=True)
