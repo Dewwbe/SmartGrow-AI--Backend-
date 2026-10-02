@@ -6,15 +6,46 @@
   },
   "item": [
     {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{base_url}}/health", "host": ["{{base_url}}"], "path": ["health"]}
+          }
+        }
+      ]
+    },
+    {
       "name": "Auth",
       "item": [
         {
           "name": "Register",
+          "event": [{"listen": "test", "script": {"exec": [
+            "const body = pm.response.json();",
+            "if (body.id) { pm.environment.set('user_id', body.id); }"
+          ], "type": "text/javascript"}}],
           "request": {
             "method": "POST",
             "header": [{"key": "Content-Type", "value": "application/json"}],
             "body": {"mode": "raw", "raw": "{\n  \"email\": \"grower@example.com\",\n  \"password\": \"supersecret123\",\n  \"full_name\": \"Test Grower\",\n  \"role\": \"grower\"\n}"},
             "url": {"raw": "{{base_url}}/api/v1/auth/register", "host": ["{{base_url}}"], "path": ["api","v1","auth","register"]}
+          }
+        },
+        {
+          "name": "Register (Admin)",
+          "event": [{"listen": "test", "script": {"exec": [
+            "const body = pm.response.json();",
+            "if (body.id) { pm.environment.set('admin_user_id', body.id); }"
+          ], "type": "text/javascript"}}],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"email\": \"{{admin_email}}\",\n  \"password\": \"{{admin_password}}\",\n  \"full_name\": \"Test Admin\",\n  \"role\": \"admin\"\n}"},
+            "url": {"raw": "{{base_url}}/api/v1/auth/register", "host": ["{{base_url}}"], "path": ["api","v1","auth","register"]},
+            "description": "NOTE: self-registering as admin is a prototype-only gap called out in the README's security notes -- lock this down before any real deployment."
           }
         },
         {
@@ -28,6 +59,19 @@
             "method": "POST",
             "header": [{"key": "Content-Type", "value": "application/json"}],
             "body": {"mode": "raw", "raw": "{\n  \"email\": \"grower@example.com\",\n  \"password\": \"supersecret123\"\n}"},
+            "url": {"raw": "{{base_url}}/api/v1/auth/login", "host": ["{{base_url}}"], "path": ["api","v1","auth","login"]}
+          }
+        },
+        {
+          "name": "Login (Admin)",
+          "event": [{"listen": "test", "script": {"exec": [
+            "const body = pm.response.json();",
+            "if (body.access_token) { pm.environment.set('admin_access_token', body.access_token); }"
+          ], "type": "text/javascript"}}],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"email\": \"{{admin_email}}\",\n  \"password\": \"{{admin_password}}\"\n}"},
             "url": {"raw": "{{base_url}}/api/v1/auth/login", "host": ["{{base_url}}"], "path": ["api","v1","auth","login"]}
           }
         },
@@ -59,6 +103,35 @@
             "method": "GET",
             "header": [{"key": "Authorization", "value": "Bearer {{access_token}}"}],
             "url": {"raw": "{{base_url}}/api/v1/auth/me", "host": ["{{base_url}}"], "path": ["api","v1","auth","me"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users (Admin)",
+      "item": [
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_access_token}}"}],
+            "url": {"raw": "{{base_url}}/api/v1/users?skip=0&limit=50", "host": ["{{base_url}}"], "path": ["api","v1","users"], "query": [{"key": "skip", "value": "0"}, {"key": "limit", "value": "50"}]}
+          }
+        },
+        {
+          "name": "Get User",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_access_token}}"}],
+            "url": {"raw": "{{base_url}}/api/v1/users/{{user_id}}", "host": ["{{base_url}}"], "path": ["api","v1","users","{{user_id}}"]}
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{admin_access_token}}"}],
+            "url": {"raw": "{{base_url}}/api/v1/users/{{user_id}}", "host": ["{{base_url}}"], "path": ["api","v1","users","{{user_id}}"]}
           }
         }
       ]
